@@ -1,59 +1,265 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# PHP_Laravel12_Create_Custome_Validation_Error
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
 
-## About Laravel
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Step 1: Install Laravel 12
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+This step is optional.  
+If you have not created a Laravel application, run:
 
-## Learning Laravel
+```
+composer create-project laravel/laravel example-app
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+**Explanation:**  
+This command creates a fresh Laravel 12 project with default configuration and folder structure.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## Step 2: Create Controller
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Create a controller to handle form display and form submission.
 
-### Premium Partners
+```
+php artisan make:controller FormController
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Open the controller file:
 
-## Contributing
+```
+app/Http/Controllers/FormController.php
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Add the following code:
 
-## Code of Conduct
+```php
+<?php
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+namespace App\Http\Controllers;
 
-## Security Vulnerabilities
+use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+/**
+ * Controller handles user registration form operations
+ * - Display user creation form
+ * - Validate and store new user data
+ */
+class FormController extends Controller
+{
+    /**
+     * Display the user creation form
+     *
+     * @return View
+     */
+    public function create(): View
+    {
+        // Return the Blade view that contains the form
+        return view('createUser');
+    }
 
-## License
+    /**
+     * Store a newly created user in the database
+     *
+     * @param Request $request
+     * @return RedirectResponse
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        // Validate request with custom error messages
+        $validatedData = $request->validate(
+            [
+                'name' => 'required',
+                'password' => 'required|min:5',
+                'email' => 'required|email|unique:users',
+            ],
+            [
+                'name.required' => 'Name field is required.',
+                'password.required' => 'Password field is required.',
+                'email.required' => 'Email field is required.',
+                'email.email' => 'Email field must be email address.',
+            ]
+        );
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+        // Encrypt password before storing
+        $validatedData['password'] = bcrypt($validatedData['password']);
+
+        // Create new user record
+        User::create($validatedData);
+
+        // Redirect back with success message
+        return back()->with('success', 'User created successfully.');
+    }
+}
+```
+
+**Explanation:**  
+- `$request->validate()` validates incoming form data  
+- Second array defines **custom error messages**  
+- Password is encrypted using `bcrypt()`  
+- User data is stored using Eloquent ORM  
+
+---
+
+## Step 3: Create Routes
+
+Open `routes/web.php` and add:
+
+```php
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FormController;
+
+// Display user creation form
+Route::get('users/create', [FormController::class, 'create']);
+
+// Handle form submission
+Route::post('users/create', [FormController::class, 'store'])
+    ->name('users.store');
+
+// Default home route
+Route::get('/', function () {
+    return view('welcome');
+});
+```
+
+**Explanation:**  
+- GET route shows the form  
+- POST route processes form submission  
+- Named route `users.store` is used in Blade form action  
+
+---
+
+## Step 4: Create Blade File
+
+Create Blade file:
+
+```
+resources/views/createUser.blade.php
+```
+
+Add the following code:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Laravel 12 Form Validation Example</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome (used in original document) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+
+<body>
+<div class="container">
+    <div class="card mt-5">
+
+        <h3 class="card-header p-3">
+            Laravel 12 Form Validation Example
+        </h3>
+
+        <div class="card-body">
+
+            <!-- Success Message -->
+            @if (session('success'))
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            <!-- Display all validation errors -->
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <strong>Whoops!</strong> There were some problems with your input.
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <!-- Form -->
+            <form method="POST" action="{{ route('users.store') }}">
+                @csrf
+
+                <!-- Name -->
+                <div class="mb-3">
+                    <label>Name:</label>
+                    <input type="text"
+                           name="name"
+                           class="form-control @error('name') is-invalid @enderror"
+                           value="{{ old('name') }}">
+                    @error('name')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Password -->
+                <div class="mb-3">
+                    <label>Password:</label>
+                    <input type="password"
+                           name="password"
+                           class="form-control @error('password') is-invalid @enderror">
+                    @if ($errors->has('password'))
+                        <span class="text-danger">{{ $errors->first('password') }}</span>
+                    @endif
+                </div>
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label>Email:</label>
+                    <input type="text"
+                           name="email"
+                           class="form-control @error('email') is-invalid @enderror"
+                           value="{{ old('email') }}">
+                    @error('email')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Submit -->
+                <button class="btn btn-success" type="submit">
+                    Submit
+                </button>
+            </form>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>
+```
+
+**Explanation:**  
+- `$errors->any()` displays all validation errors  
+- `@error('field')` shows field-specific error  
+- `old()` keeps previous input after validation failure  
+- CSRF token protects form submission  
+
+---
+
+## Step 5: Run Laravel Application
+
+Start the server:
+
+```
+php artisan serve
+```
+
+Open in browser:
+
+```
+
+
+http://localhost:8000/users/create
+```
+<img width="1599" height="803" alt="image" src="https://github.com/user-attachments/assets/fdf6b520-e4be-41e6-bb73-740ed0e23fef" />
