@@ -2,75 +2,93 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreUserRequest;
 use App\Models\User;
-use Illuminate\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 
-/**
- * Controller handles user registration form operations
- * - Display user creation form
- * - Validate and store new user data
- */
 class FormController extends Controller
 {
     /**
-     * Display the user creation form
-     * 
-     * This method returns the view that contains the HTML form
-     * for creating a new user account.
-     * 
-     * @return View - Returns the 'createUser' blade template
+     * Display a paginated list of all users.
+     */
+    public function index(): View
+    {
+        $users = User::orderBy('created_at', 'desc')->paginate(10);
+
+        return view('users.index', compact('users'));
+    }
+
+    /**
+     * Display the user creation form.
      */
     public function create(): View
     {
-        // Simply return the createUser blade view with empty form
         return view('createUser');
     }
-     
+
     /**
-     * Store a newly created user in database
-     * 
-     * This method:
-     * 1. Validates incoming form data
-     * 2. Hashes the password for security
-     * 3. Creates new user record
-     * 4. Redirects back with success message
-     * 
-     * @param Request $request - Contains form data (name, email, password)
-     * @return RedirectResponse - Redirects back to form with status message
+     * Store a newly created user in database.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreUserRequest $request): RedirectResponse
     {
-        // Validate form inputs with custom error messages
-        $validatedData = $request->validate([
-                // Name field is mandatory
-                'name' => 'required',
-                
-                // Password must be at least 5 characters
-                'password' => 'required|min:5',
-                
-                // Email must be valid format and unique in users table
-                'email' => 'required|email|unique:users'
-            ], [
-                // Custom error messages for better UX
-                'name.required' => 'Name field is required.',
-                'password.required' => 'Password field is required.',
-                'email.required' => 'Email field is required.',
-                'email.email' => 'Email field must be email address.',
-                // Note: Laravel auto-generates other validation errors
-            ]);
-        
-        // Hash password using bcrypt for secure storage
-        // Never store plain text passwords in database
+        $validatedData = $request->validated();
+
         $validatedData['password'] = bcrypt($validatedData['password']);
-        
-        // Create new user record using Eloquent ORM
-        // This automatically inserts data into users table
-        $user = User::create($validatedData);
-         
-        // Redirect back to previous page (form) with success flash message
-        // Message will be displayed using session flash data
-        return back()->with('success', 'User created successfully.');
+
+        User::create($validatedData);
+
+        return redirect()->route('users.index')->with('success', 'User created successfully.');
+    }
+
+    /**
+     * Delete the specified user.
+     */
+    public function destroy(User $user): RedirectResponse
+    {
+        $user->delete();
+
+        return back()->with('success', 'User deleted successfully.');
+    }
+
+    /**
+     * Validate form fields via AJAX (real-time, no page refresh).
+     *
+     * Returns JSON with field-level validation errors.
+     * The "confirmed" rule is skipped here because it is better
+     * handled client-side during typing; the full validation
+     * still runs on actual form submission.
+     */
+    public function validateAjax(Request $request): JsonResponse
+    {
+        $input = $request->only(['name', 'email', 'password', 'password_confirmation']);
+
+        $rules = (new StoreUserRequest)->rules();
+        $messages = (new StoreUserRequest)->messages();
+
+        // Remove the 'confirmed' rule for real-time validation;
+        // password confirmation is validated on final form submit.
+        $passwordRules = [];
+        foreach ($rules['password'] as $rule) {
+            if (is_string($rule) && $rule === 'confirmed') {
+                continue;
+            }
+            $passwordRules[] = $rule;
+        }
+        $rules['password'] = $passwordRules;
+
+        $validator = Validator::make($input, $rules, $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        return response()->json(['success' => true]);
     }
 }
