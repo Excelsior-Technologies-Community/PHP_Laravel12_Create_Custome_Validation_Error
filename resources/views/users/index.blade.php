@@ -3,11 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Users - Laravel 12 Custom Validation</title>
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
 
     @vite(['resources/js/app.js'])
 
@@ -158,12 +167,6 @@
         .alert {
             border-radius: 0.6rem;
             margin-bottom: 1.25rem;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to   { opacity: 1; transform: translateY(0); }
         }
 
         .empty-state {
@@ -179,81 +182,177 @@
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <div class="card">
-            <div class="card-header">
-                <span><i class="fa fa-users"></i> Registered Users</span>
-                <a href="{{ route('users.create') }}" class="btn btn-success">
-                    <i class="fa fa-plus"></i> Add New User
-                </a>
-            </div>
 
-            <div class="card-body">
-                @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fa fa-check-circle me-2"></i> {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
+<div class="container">
 
-                @if ($users->count() > 0)
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Avatar</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Created</th>
-                                    <th class="text-end">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($users as $user)
-                                    <tr>
-                                        <td>{{ $users->currentPage() == 1 ? $loop->iteration : ($users->perPage() * ($users->currentPage() - 1)) + $loop->iteration }}</td>
-                                        <td>
-                                            <div class="avatar">
-                                                {{ strtoupper(substr($user->name, 0, 2)) }}
-                                            </div>
-                                        </td>
-                                        <td>{{ $user->name }}</td>
-                                        <td>{{ $user->email }}</td>
-                                        <td>{{ $user->created_at->format('M d, Y') }}</td>
-                                        <td class="text-end">
-                                            <form action="{{ route('users.destroy', $user) }}" method="POST" style="display:inline-block;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="action-btn btn-delete" title="Delete"
-                                                    onclick="return confirm('Are you sure you want to delete {{ $user->name }}?')">
-                                                    <i class="fa fa-trash"></i>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+    <div class="card">
 
-                    <div class="d-flex justify-content-center mt-4">
-                        {{ $users->links() }}
-                    </div>
-                @else
-                    <div class="empty-state">
-                        <i class="fa fa-user-slash"></i>
-                        <h5 class="mb-3" style="color:#9ca3af;">No users found</h5>
-                        <a href="{{ route('users.create') }}" class="btn btn-primary">
-                            <i class="fa fa-plus"></i> Create first user
-                        </a>
-                    </div>
-                @endif
-            </div>
+        <div class="card-header">
+
+            <span>
+                <i class="fa fa-users"></i>
+                Registered Users
+            </span>
+
+            <a
+                href="{{ route('users.create') }}"
+                class="btn btn-success"
+            >
+                <i class="fa fa-plus"></i>
+                Add New User
+            </a>
+
         </div>
+
+        <div class="card-body">
+
+            @if (session('success'))
+                <div
+                    class="alert alert-success alert-dismissible fade show"
+                    role="alert"
+                >
+                    <i class="fa fa-check-circle me-2"></i>
+                    {{ session('success') }}
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                    ></button>
+                </div>
+            @endif
+
+            @if ($users->count() > 0)
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Avatar</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Created</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach ($users as $user)
+
+                                <tr>
+
+                                    <td>
+                                        {{
+                                            $users->currentPage() == 1
+                                                ? $loop->iteration
+                                                : ($users->perPage() * ($users->currentPage() - 1))
+                                                    + $loop->iteration
+                                        }}
+                                    </td>
+
+                                    <td>
+                                        <div class="avatar">
+                                            {{ strtoupper(substr($user->name, 0, 2)) }}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        {{ $user->name }}
+                                    </td>
+
+                                    <td>
+                                        {{ $user->email }}
+                                    </td>
+
+                                    <td>
+                                        {{ $user->created_at->format('M d, Y') }}
+                                    </td>
+
+                                    <td class="text-end">
+
+                                        {{-- Edit --}}
+                                        <a
+                                            href="{{ route('users.edit', $user) }}"
+                                            class="action-btn btn-edit"
+                                            title="Edit User"
+                                        >
+                                            <i class="fa fa-pen"></i>
+                                        </a>
+
+                                        {{-- Delete --}}
+                                        <form
+                                            action="{{ route('users.destroy', $user) }}"
+                                            method="POST"
+                                            style="display:inline-block;"
+                                        >
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button
+                                                type="submit"
+                                                class="action-btn btn-delete"
+                                                title="Delete"
+                                                onclick="return confirm('Are you sure you want to delete {{ $user->name }}?')"
+                                            >
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+
+                                        </form>
+
+                                    </td>
+
+                                </tr>
+
+                            @endforeach
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div class="d-flex justify-content-center mt-4">
+                    {{ $users->links() }}
+                </div>
+
+            @else
+
+                <div class="empty-state">
+
+                    <i class="fa fa-user-slash"></i>
+
+                    <h5
+                        class="mb-3"
+                        style="color:#9ca3af;"
+                    >
+                        No users found
+                    </h5>
+
+                    <a
+                        href="{{ route('users.create') }}"
+                        class="btn btn-primary"
+                    >
+                        <i class="fa fa-plus"></i>
+                        Create first user
+                    </a>
+
+                </div>
+
+            @endif
+
+        </div>
+
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

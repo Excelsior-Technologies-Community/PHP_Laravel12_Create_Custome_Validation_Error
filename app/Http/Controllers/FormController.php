@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -31,17 +32,51 @@ class FormController extends Controller
     }
 
     /**
-     * Store a newly created user in database.
+     * Store a newly created user.
      */
     public function store(StoreUserRequest $request): RedirectResponse
     {
         $validatedData = $request->validated();
 
-        $validatedData['password'] = bcrypt($validatedData['password']);
-
+        // Password is automatically hashed by the User model cast.
         User::create($validatedData);
 
-        return redirect()->route('users.index')->with('success', 'User created successfully.');
+        return redirect()
+            ->route('users.index')
+            ->with('success', 'User created successfully.');
+    }
+
+    /**
+     * Display the user edit form.
+     */
+    public function edit(User $user): View
+    {
+        return view('users.edit', compact('user'));
+    }
+
+    /**
+     * Update an existing user.
+     */
+    public function update(
+        UpdateUserRequest $request,
+        User $user
+    ): RedirectResponse {
+        $validatedData = $request->validated();
+
+        /*
+         * If password is empty, remove it from the update data
+         * so the existing password remains unchanged.
+         */
+        if (empty($validatedData['password'])) {
+            unset($validatedData['password']);
+        }
+
+        // Password is automatically hashed by the User model cast.
+        $user->update($validatedData);
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', 'User updated successfully.');
     }
 
     /**
@@ -55,32 +90,38 @@ class FormController extends Controller
     }
 
     /**
-     * Validate form fields via AJAX (real-time, no page refresh).
-     *
-     * Returns JSON with field-level validation errors.
-     * The "confirmed" rule is skipped here because it is better
-     * handled client-side during typing; the full validation
-     * still runs on actual form submission.
+     * Validate create form fields through AJAX.
      */
     public function validateAjax(Request $request): JsonResponse
     {
-        $input = $request->only(['name', 'email', 'password', 'password_confirmation']);
+        $input = $request->only([
+            'name',
+            'email',
+            'password',
+            'password_confirmation',
+        ]);
 
-        $rules = (new StoreUserRequest)->rules();
-        $messages = (new StoreUserRequest)->messages();
+        $formRequest = new StoreUserRequest;
 
-        // Remove the 'confirmed' rule for real-time validation;
-        // password confirmation is validated on final form submit.
-        $passwordRules = [];
-        foreach ($rules['password'] as $rule) {
-            if (is_string($rule) && $rule === 'confirmed') {
-                continue;
-            }
-            $passwordRules[] = $rule;
-        }
-        $rules['password'] = $passwordRules;
+        $rules = $formRequest->rules();
+        $messages = $formRequest->messages();
 
-        $validator = Validator::make($input, $rules, $messages);
+        /*
+         * During real-time validation, confirmed is handled
+         * separately by the frontend.
+         */
+        $rules['password'] = array_values(
+            array_filter(
+                $rules['password'],
+                fn ($rule) => $rule !== 'confirmed'
+            )
+        );
+
+        $validator = Validator::make(
+            $input,
+            $rules,
+            $messages
+        );
 
         if ($validator->fails()) {
             return response()->json([
@@ -89,6 +130,56 @@ class FormController extends Controller
             ], 422);
         }
 
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
+    /**
+     * Validate edit form fields through AJAX.
+     */
+    public function validateUpdateAjax(
+        Request $request,
+        User $user
+    ): JsonResponse {
+        $input = $request->only([
+            'name',
+            'email',
+            'password',
+            'password_confirmation',
+        ]);
+
+        $formRequest = new UpdateUserRequest;
+
+        $rules = $formRequest->rulesForUser($user);
+        $messages = $formRequest->messages();
+
+        /*
+         * Password confirmation is checked when the complete
+         * form is submitted.
+         */
+        $rules['password'] = array_values(
+            array_filter(
+                $rules['password'],
+                fn ($rule) => $rule !== 'confirmed'
+            )
+        );
+
+        $validator = Validator::make(
+            $input,
+            $rules,
+            $messages
+        );
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+        ]);
     }
 }

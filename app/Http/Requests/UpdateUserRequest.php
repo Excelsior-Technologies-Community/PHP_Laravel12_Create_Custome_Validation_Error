@@ -2,11 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use App\Rules\NotCommonPassword;
 use App\Rules\PasswordStrength;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class StoreUserRequest extends FormRequest
+class UpdateUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -48,6 +50,21 @@ class StoreUserRequest extends FormRequest
      */
     public function rules(): array
     {
+        $user = $this->route('user');
+
+        if (! $user instanceof User) {
+            $user = User::find($user);
+        }
+
+        return $this->rulesForUser($user);
+    }
+
+    /**
+     * Rules used by both normal update validation
+     * and AJAX validation.
+     */
+    public function rulesForUser(?User $user): array
+    {
         return [
             'name' => [
                 'required',
@@ -59,11 +76,12 @@ class StoreUserRequest extends FormRequest
                 'required',
                 'email',
                 'max:255',
-                'unique:users,email',
+                Rule::unique('users', 'email')
+                    ->ignore($user?->id),
             ],
 
             'password' => [
-                'required',
+                'nullable',
                 'string',
                 'min:8',
                 'confirmed',
@@ -86,12 +104,11 @@ class StoreUserRequest extends FormRequest
             'email.required' => 'Email field is required.',
             'email.email' => 'Email field must be a valid email address.',
             'email.max' => 'Email may not be greater than 255 characters.',
-            'email.unique' => 'This email is already registered. Please try another.',
+            'email.unique' => 'This email is already registered by another user.',
 
-            'password.required' => 'Password field is required.',
             'password.string' => 'Password must be a valid text value.',
-            'password.min' => 'Password must be at least 8 characters long.',
-            'password.confirmed' => 'Password confirmation does not match.',
+            'password.min' => 'New password must be at least 8 characters long.',
+            'password.confirmed' => 'New password confirmation does not match.',
         ];
     }
 }
