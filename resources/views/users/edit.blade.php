@@ -7,44 +7,45 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+        content="width=device-width, initial-scale=1.0">
 
-    <title>Edit User - Laravel 12 Custom Validation</title>
+    <title>
+        Edit User - Laravel 12 Custom Validation
+    </title>
 
     <meta
         name="csrf-token"
-        content="{{ csrf_token() }}"
-    >
+        content="{{ csrf_token() }}">
 
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
+        rel="stylesheet">
 
     <link
         rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
     @vite(['resources/js/app.js'])
 
     <style>
-
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
 
         body {
-            background: linear-gradient(
-                135deg,
-                #667eea 0%,
-                #764ba2 100%
-            );
+            margin: 0;
 
             min-height: 100vh;
+
+            padding: 30px 20px;
+
+            background:
+                radial-gradient(circle at top left,
+                    rgba(255, 255, 255, .18),
+                    transparent 30%),
+                linear-gradient(135deg,
+                    #667eea,
+                    #764ba2);
 
             display: flex;
 
@@ -52,86 +53,114 @@
 
             justify-content: center;
 
-            padding: 20px;
+            font-family:
+                Inter,
+                system-ui,
+                sans-serif;
+        }
+
+        .main-wrapper {
+            width: 100%;
+            max-width: 680px;
         }
 
         .card {
-            border: none;
+            border: 0;
 
-            border-radius: 1rem;
-
-            box-shadow:
-                0 20px 40px rgba(0, 0, 0, 0.15);
+            border-radius: 22px;
 
             overflow: hidden;
+
+            box-shadow:
+                0 25px 60px rgba(0, 0, 0, .20);
         }
 
         .card-header {
-            background: linear-gradient(
-                135deg,
-                #1e3c72 0%,
-                #2a5298 100%
-            );
+            padding: 22px 25px;
+
+            background:
+                linear-gradient(135deg,
+                    #1e3c72,
+                    #2a5298);
 
             color: white;
 
-            font-weight: 600;
-
-            font-size: 1.25rem;
-
-            border: none;
-
-            padding: 1.25rem 1.75rem;
+            border: 0;
         }
 
-        .card-header i {
-            color: #f8b400;
+        .header-title {
+            display: flex;
 
-            margin-right: 0.5rem;
+            align-items: center;
+
+            gap: 12px;
+        }
+
+        .header-icon {
+            width: 42px;
+            height: 42px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 12px;
+
+            background:
+                rgba(255, 255, 255, .15);
+
+            color: #ffd166;
+        }
+
+        .header-title h4 {
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .header-title small {
+            opacity: .7;
         }
 
         .card-body {
-            padding: 2rem 2.5rem;
+            padding: 30px;
 
-            background: #fafafa;
+            background: white;
         }
 
         .form-field {
-            position: relative;
-
-            margin-bottom: 1.5rem;
+            margin-bottom: 22px;
         }
 
         .form-label {
-            font-weight: 600;
+            font-weight: 700;
 
-            color: #333;
+            color: #374151;
 
-            margin-bottom: 0.4rem;
+            margin-bottom: 8px;
+        }
 
-            font-size: 0.9rem;
+        .form-label i {
+            color: #667eea;
         }
 
         .form-control {
-            border-radius: 0.6rem;
+            min-height: 48px;
 
-            border: 2px solid #e0e0e0;
+            border: 2px solid #e5e7eb;
 
-            padding: 0.7rem 1rem;
+            border-radius: 12px;
 
-            font-size: 0.95rem;
+            padding: 10px 14px;
 
-            transition:
-                border-color 0.2s ease,
-                box-shadow 0.2s ease;
+            transition: .2s ease;
         }
 
         .form-control:focus {
             border-color: #667eea;
 
             box-shadow:
-                0 0 0 3px
-                rgba(102, 126, 234, 0.15);
+                0 0 0 4px rgba(102, 126, 234, .12);
         }
 
         .form-control.is-invalid {
@@ -142,172 +171,164 @@
             border-color: #22c55e;
         }
 
-        .error-banner {
-            position: absolute;
-
-            bottom: -1.6rem;
-
-            left: 0;
-
-            right: 0;
-
-            background: #fee2e2;
-
-            border: 1px solid #fca5a5;
-
-            color: #991c1c;
-
-            padding: 0.5rem 0.75rem;
-
-            border-radius: 0.5rem;
-
-            font-size: 0.8rem;
-
-            opacity: 0;
-
-            transform: translateY(0.6rem);
-
-            transition: all 0.25s ease;
-
-            pointer-events: none;
-
-            z-index: 5;
+        .input-group .form-control {
+            border-radius: 12px 0 0 12px;
         }
 
-        .error-banner.show {
-            opacity: 1;
-
-            transform: translateY(0);
-        }
-
-        .error-banner::before {
-            content: "\f057";
-
-            font-family:
-                "Font Awesome 6 Free";
-
-            font-weight: 900;
-
-            margin-right: 0.5rem;
-
-            color: #dc2626;
+        .input-group .btn {
+            border-radius: 0 12px 12px 0;
         }
 
         .text-danger {
-            font-size: 0.8rem;
-
-            margin-top: 0.2rem;
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 0.3rem;
-
             color: #dc2626 !important;
+
+            font-size: .82rem;
+
+            margin-top: 7px;
         }
 
-        .password-strength {
-            margin-top: 0.5rem;
+        .field-success {
+            color: #15803d;
 
-            padding: 0.75rem;
+            font-size: .82rem;
 
-            background: #fff;
+            margin-top: 7px;
+
+            display: none;
+        }
+
+        .duplicate-warning {
+            margin-top: 9px;
+
+            padding: 10px 13px;
+
+            border-radius: 10px;
+
+            background: #fff7ed;
+
+            border: 1px solid #fed7aa;
+
+            color: #9a3412;
+
+            font-size: .82rem;
+        }
+
+        .password-box {
+            margin-top: 12px;
+
+            padding: 16px;
+
+            border-radius: 14px;
+
+            background: #f8fafc;
 
             border: 1px solid #e5e7eb;
-
-            border-radius: 0.5rem;
         }
 
-        .strength-bar-container {
-            background: #e5e7eb;
+        .password-title {
+            font-size: .85rem;
 
-            border-radius: 9999px;
-
-            height: 0.5rem;
-
-            overflow: hidden;
-
-            margin-bottom: 0.3rem;
-        }
-
-        .strength-bar {
-            height: 100%;
-
-            width: 0%;
-
-            border-radius: 9999px;
-
-            transition: all 0.3s ease;
-        }
-
-        .strength-label {
-            font-size: 0.8rem;
-
-            font-weight: 600;
-
-            display: flex;
-
-            justify-content: space-between;
-        }
-
-        .hint {
-            font-size: 0.78rem;
-
-            color: #6b7280;
-
-            margin-top: 0.2rem;
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 0.3rem;
-        }
-
-        /*
-         * Validation status
-         */
-        .validation-status {
-            background: #ffffff;
-
-            border: 1px solid #e5e7eb;
-
-            border-radius: 0.7rem;
-
-            padding: 1rem;
-
-            margin-bottom: 1.5rem;
-        }
-
-        .validation-status-title {
             font-weight: 700;
 
             color: #374151;
 
-            margin-bottom: 0.75rem;
+            margin-bottom: 10px;
+        }
+
+        .password-rule {
+            font-size: .82rem;
+
+            margin-bottom: 7px;
+
+            color: #6b7280;
+        }
+
+        .password-rule.valid {
+            color: #15803d;
+
+            font-weight: 600;
+        }
+
+        .password-rule.invalid {
+            color: #dc2626;
+        }
+
+        .password-strength {
+            height: 7px;
+
+            background: #e5e7eb;
+
+            border-radius: 50px;
+
+            overflow: hidden;
+
+            margin-top: 13px;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+
+            width: 0%;
+
+            border-radius: 50px;
+
+            transition: .3s ease;
+        }
+
+        .strength-text {
+            margin-top: 6px;
+
+            font-size: .78rem;
+
+            font-weight: 700;
+
+            color: #6b7280;
+        }
+
+        .hint {
+            color: #6b7280;
+
+            font-size: .78rem;
+
+            margin-top: 7px;
+        }
+
+        .validation-status {
+            padding: 16px;
+
+            margin-bottom: 25px;
+
+            border-radius: 15px;
+
+            background: #f8fafc;
+
+            border: 1px solid #e5e7eb;
+        }
+
+        .validation-title {
+            font-weight: 800;
+
+            color: #374151;
+
+            margin-bottom: 12px;
         }
 
         .validation-item {
-            font-size: 0.82rem;
-
             display: flex;
 
             align-items: center;
 
-            margin-bottom: 0.45rem;
+            gap: 8px;
+
+            font-size: .82rem;
+
+            margin-bottom: 8px;
 
             color: #6b7280;
         }
 
         .validation-item:last-child {
             margin-bottom: 0;
-        }
-
-        .validation-item i {
-            width: 20px;
-
-            margin-right: 0.35rem;
         }
 
         .validation-item.valid {
@@ -318,435 +339,1357 @@
             color: #dc2626;
         }
 
-        .validation-item.pending {
-            color: #6b7280;
+        .validation-item i {
+            width: 17px;
         }
 
-        .validation-complete {
-            display: none;
+        .submit-btn {
+            min-height: 50px;
 
-            margin-top: 0.75rem;
+            border: 0;
 
-            padding: 0.6rem 0.75rem;
+            border-radius: 12px;
 
-            border-radius: 0.5rem;
+            font-weight: 700;
 
-            background: #dcfce7;
-
-            color: #166534;
-
-            font-size: 0.82rem;
-
-            font-weight: 600;
+            background:
+                linear-gradient(135deg,
+                    #10b981,
+                    #059669);
         }
 
-        .btn-submit {
-            border-radius: 0.6rem;
+        @media(max-width:576px) {
 
-            padding: 0.7rem 2rem;
+            .card-body {
+                padding: 20px;
+            }
 
-            font-weight: 600;
-
-            font-size: 0.95rem;
         }
-
     </style>
 
 </head>
 
 <body>
 
-<div
-    class="container"
-    style="max-width: 650px;"
->
+    <div class="main-wrapper">
 
-    <div class="card">
+        <div class="card">
 
-        <div class="card-header">
+            {{-- HEADER --}}
+            <div class="card-header">
 
-            <div class="d-flex align-items-center">
+                <div class="header-title">
 
-                <a
-                    href="{{ route('users.index') }}"
-                    class="btn btn-sm btn-outline-light me-2"
-                    style="border-radius: 0.4rem;"
-                >
-                    <i class="fa fa-arrow-left"></i>
-                </a>
+                    <a
+                        href="{{ route('users.index') }}"
+                        class="btn btn-sm btn-outline-light">
 
-                <i class="fa fa-user-pen"></i>
+                        <i class="fa fa-arrow-left"></i>
 
-                Edit User
+                    </a>
 
-            </div>
+                    <div class="header-icon">
 
-        </div>
+                        <i class="fa fa-user-pen"></i>
 
-        <div class="card-body">
+                    </div>
 
-            @if (session('success'))
+                    <div>
 
-                <div
-                    class="alert alert-success alert-dismissible fade show"
-                    role="alert"
-                >
+                        <h4>Edit User</h4>
 
-                    <i class="fa fa-check-circle me-2"></i>
+                        <small>
+                            Update user information securely
+                        </small>
 
-                    {{ session('success') }}
-
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="alert"
-                    ></button>
+                    </div>
 
                 </div>
 
-            @endif
+            </div>
 
 
-            @if ($errors->any())
+            <div class="card-body">
 
-                <div
-                    class="alert alert-danger alert-dismissible fade show"
-                    role="alert"
-                >
+
+                @if(session('success'))
+
+                <div class="alert alert-success">
+
+                    <i class="fa fa-circle-check me-2"></i>
+
+                    {{ session('success') }}
+
+                </div>
+
+                @endif
+
+
+                @if($errors->any())
+
+                <div class="alert alert-danger">
 
                     <strong>
-                        <i class="fa fa-exclamation-triangle me-2"></i>
+                        <i class="fa fa-triangle-exclamation me-1"></i>
                         Please fix the following:
                     </strong>
 
                     <ul class="mb-0 mt-2">
 
-                        @foreach ($errors->all() as $error)
+                        @foreach($errors->all() as $error)
 
-                            <li>
-                                {{ $error }}
-                            </li>
+                        <li>
+                            {{ $error }}
+                        </li>
 
                         @endforeach
 
                     </ul>
 
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="alert"
-                    ></button>
-
                 </div>
 
-            @endif
+                @endif
 
 
-            {{-- Validation Status --}}
+                {{-- VALIDATION STATUS --}}
+                <div class="validation-status">
 
-            <div
-                class="validation-status"
-                id="validation-status"
-            >
+                    <div class="validation-title">
 
-                <div class="validation-status-title">
+                        <i
+                            class="fa fa-clipboard-check me-1"></i>
 
-                    <i class="fa fa-clipboard-check me-1"></i>
+                        Validation Status
 
-                    Validation Status
-
-                </div>
+                    </div>
 
 
-                <div
-                    class="validation-item pending"
-                    data-status-field="name"
-                >
+                    <div
+                        class="validation-item"
+                        id="status-name">
 
-                    <i class="fa fa-circle"></i>
-
-                    Name
-
-                </div>
-
-
-                <div
-                    class="validation-item pending"
-                    data-status-field="email"
-                >
-
-                    <i class="fa fa-circle"></i>
-
-                    Email
-
-                </div>
-
-
-                <div
-                    class="validation-item pending"
-                    data-status-field="password"
-                >
-
-                    <i class="fa fa-circle"></i>
-
-                    New password
-
-                </div>
-
-
-                <div
-                    class="validation-item pending"
-                    data-status-field="password_confirmation"
-                >
-
-                    <i class="fa fa-circle"></i>
-
-                    Password confirmation
-
-                </div>
-
-
-                <div
-                    id="validation-complete"
-                    class="validation-complete"
-                >
-
-                    <i class="fa fa-circle-check me-1"></i>
-
-                    All entered fields are valid.
-
-                </div>
-
-            </div>
-
-
-            <form
-                id="user-form"
-                method="POST"
-                action="{{ route('users.update', $user) }}"
-                data-validate-url="{{ route('users.validate.update', $user) }}"
-            >
-
-                @csrf
-
-                @method('PUT')
-
-
-                {{-- Name --}}
-
-                <div class="form-field">
-
-                    <label
-                        class="form-label"
-                        for="inputName"
-                    >
-
-                        <i class="fa fa-user me-1 text-muted"></i>
+                        <i class="fa fa-circle"></i>
 
                         Name
 
-                    </label>
-
-                    <input
-                        type="text"
-                        name="name"
-                        id="inputName"
-                        class="form-control @error('name') is-invalid @enderror"
-                        placeholder="Enter full name"
-                        value="{{ old('name', $user->name) }}"
-                    >
-
-                    @error('name')
-
-                        <div class="text-danger">
-
-                            <i class="fa fa-info-circle"></i>
-
-                            {{ $message }}
-
-                        </div>
-
-                    @enderror
-
-                </div>
+                    </div>
 
 
-                {{-- Email --}}
+                    <div
+                        class="validation-item"
+                        id="status-email">
 
-                <div class="form-field">
-
-                    <label
-                        class="form-label"
-                        for="inputEmail"
-                    >
-
-                        <i class="fa fa-envelope me-1 text-muted"></i>
+                        <i class="fa fa-circle"></i>
 
                         Email
 
-                    </label>
+                    </div>
 
-                    <input
-                        type="email"
-                        name="email"
-                        id="inputEmail"
-                        class="form-control @error('email') is-invalid @enderror"
-                        placeholder="you@example.com"
-                        value="{{ old('email', $user->email) }}"
-                    >
-
-                    @error('email')
-
-                        <div class="text-danger">
-
-                            <i class="fa fa-info-circle"></i>
-
-                            {{ $message }}
-
-                        </div>
-
-                    @enderror
-
-                </div>
-
-
-                {{-- Password --}}
-
-                <div class="form-field">
-
-                    <label
-                        class="form-label"
-                        for="inputPassword"
-                    >
-
-                        <i class="fa fa-lock me-1 text-muted"></i>
-
-                        New Password
-
-                    </label>
-
-                    <input
-                        type="password"
-                        name="password"
-                        id="inputPassword"
-                        class="form-control @error('password') is-invalid @enderror"
-                        placeholder="Leave empty to keep current password"
-                    >
 
                     <div
-                        id="password-strength-meter"
-                        style="display: none;"
-                        class="password-strength"
-                    >
+                        class="validation-item"
+                        id="status-password">
 
-                        <div class="strength-bar-container">
+                        <i class="fa fa-circle"></i>
 
-                            <div
-                                id="password-strength-bar"
-                                class="strength-bar"
-                            ></div>
+                        New password
 
-                        </div>
+                    </div>
 
-                        <div class="strength-label">
 
-                            <span id="password-strength-text"></span>
+                    <div
+                        class="validation-item"
+                        id="status-confirm">
 
-                        </div>
+                        <i class="fa fa-circle"></i>
+
+                        Password confirmation
+
+                    </div>
+
+                </div>
+
+
+                <form
+                    id="user-form"
+                    method="POST"
+                    action="{{ route('users.update', $user) }}"
+                    data-validate-url="{{ route('users.validate.update', $user) }}">
+
+                    @csrf
+
+                    @method('PUT')
+
+
+                    {{-- NAME --}}
+                    <div class="form-field">
+
+                        <label
+                            class="form-label"
+                            for="inputName">
+
+                            <i class="fa fa-user me-1"></i>
+
+                            Full Name
+
+                        </label>
+
+                        <input
+                            type="text"
+                            name="name"
+                            id="inputName"
+                            class="form-control"
+                            value="{{ old('name', $user->name) }}"
+                            autocomplete="name">
 
                         <div
-                            id="password-criteria"
-                            class="mt-2"
-                        ></div>
+                            id="name-error"
+                            class="text-danger"></div>
 
-                    </div>
+                        <div
+                            id="name-warning"
+                            class="duplicate-warning d-none">
 
-                    @error('password')
+                            <i
+                                class="fa fa-triangle-exclamation me-1"></i>
 
-                        <div class="text-danger">
-
-                            <i class="fa fa-info-circle"></i>
-
-                            {{ $message }}
+                            Another user already has this name.
 
                         </div>
 
-                    @enderror
+                    </div>
 
-                    <div class="hint">
 
-                        <i class="fa fa-info-circle"></i>
+                    {{-- EMAIL --}}
+                    <div class="form-field">
 
-                        Leave empty to keep the current password.
+                        <label
+                            class="form-label"
+                            for="inputEmail">
+
+                            <i class="fa fa-envelope me-1"></i>
+
+                            Email Address
+
+                        </label>
+
+                        <input
+                            type="email"
+                            name="email"
+                            id="inputEmail"
+                            class="form-control"
+                            value="{{ old('email', $user->email) }}"
+                            autocomplete="email">
+
+                        <div
+                            id="email-error"
+                            class="text-danger"></div>
 
                     </div>
 
-                </div>
+
+                    {{-- PASSWORD --}}
+                    <div class="form-field">
+
+                        <label
+                            class="form-label"
+                            for="inputPassword">
+
+                            <i class="fa fa-lock me-1"></i>
+
+                            New Password
+
+                        </label>
 
 
-                {{-- Confirm Password --}}
+                        <div class="input-group">
 
-                <div class="form-field">
+                            <input
+                                type="password"
+                                name="password"
+                                id="inputPassword"
+                                class="form-control"
+                                placeholder="Leave empty to keep current password"
+                                autocomplete="new-password">
 
-                    <label
-                        class="form-label"
-                        for="inputConfirmPassword"
-                    >
+                            <button
+                                type="button"
+                                class="btn btn-outline-secondary"
+                                id="togglePassword">
 
-                        <i class="fa fa-lock me-1 text-muted"></i>
+                                <i
+                                    class="fa fa-eye"
+                                    id="passwordIcon"></i>
 
-                        Confirm New Password
-
-                    </label>
-
-                    <input
-                        type="password"
-                        name="password_confirmation"
-                        id="inputConfirmPassword"
-                        class="form-control @error('password_confirmation') is-invalid @enderror"
-                        placeholder="Confirm new password"
-                    >
-
-                    @error('password_confirmation')
-
-                        <div class="text-danger">
-
-                            <i class="fa fa-info-circle"></i>
-
-                            {{ $message }}
+                            </button>
 
                         </div>
 
-                    @enderror
 
-                </div>
+                        {{-- PASSWORD CHECKLIST --}}
+                        <div class="password-box">
+
+                            <div class="password-title">
+
+                                <i
+                                    class="fa fa-shield-halved me-1"></i>
+
+                                Password requirements
+
+                            </div>
 
 
-                <div class="d-grid">
+                            <div
+                                class="password-rule"
+                                id="rule-length">
+                                ❌ At least 8 characters
+                            </div>
 
-                    <button
-                        class="btn btn-success btn-submit"
-                        type="submit"
-                    >
+                            <div
+                                class="password-rule"
+                                id="rule-uppercase">
+                                ❌ One uppercase letter
+                            </div>
 
-                        <i class="fa fa-save"></i>
+                            <div
+                                class="password-rule"
+                                id="rule-lowercase">
+                                ❌ One lowercase letter
+                            </div>
 
-                        Update User
+                            <div
+                                class="password-rule"
+                                id="rule-number">
+                                ❌ One number
+                            </div>
 
-                    </button>
+                            <div
+                                class="password-rule"
+                                id="rule-special">
+                                ❌ One special character
+                            </div>
 
-                </div>
+                            <div
+                                class="password-rule"
+                                id="rule-common">
+                                ❌ Not a common password
+                            </div>
 
-            </form>
+
+                            <div class="password-strength">
+
+                                <div
+                                    id="password-strength-bar"
+                                    class="password-strength-bar"></div>
+
+                            </div>
+
+
+                            <div
+                                id="strength-text"
+                                class="strength-text">
+                                Password strength: —
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            id="password-error"
+                            class="text-danger"></div>
+
+                        <div class="hint">
+
+                            <i class="fa fa-circle-info me-1"></i>
+
+                            Leave empty if you don't want to change the password.
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- CONFIRM PASSWORD --}}
+                    <div class="form-field">
+
+                        <label
+                            class="form-label"
+                            for="inputConfirmPassword">
+
+                            <i class="fa fa-lock me-1"></i>
+
+                            Confirm New Password
+
+                        </label>
+
+
+                        <div class="input-group">
+
+                            <input
+                                type="password"
+                                name="password_confirmation"
+                                id="inputConfirmPassword"
+                                class="form-control"
+                                placeholder="Confirm new password"
+                                autocomplete="new-password">
+
+                            <button
+                                type="button"
+                                class="btn btn-outline-secondary"
+                                id="toggleConfirmPassword">
+
+                                <i
+                                    class="fa fa-eye"
+                                    id="confirmIcon"></i>
+
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            id="confirm-error"
+                            class="text-danger"></div>
+
+                    </div>
+
+
+                    {{-- SUBMIT --}}
+                    <div class="d-grid">
+
+                        <button
+                            type="submit"
+                            class="btn btn-success submit-btn"
+                            id="submitButton">
+
+                            <i class="fa fa-save me-1"></i>
+
+                            Update User
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
 
         </div>
 
     </div>
 
-</div>
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener(
+            'DOMContentLoaded',
+            function() {
+
+                const form =
+                    document.getElementById(
+                        'user-form'
+                    );
+
+                const nameInput =
+                    document.getElementById(
+                        'inputName'
+                    );
+
+                const emailInput =
+                    document.getElementById(
+                        'inputEmail'
+                    );
+
+                const passwordInput =
+                    document.getElementById(
+                        'inputPassword'
+                    );
+
+                const confirmInput =
+                    document.getElementById(
+                        'inputConfirmPassword'
+                    );
+
+                const submitButton =
+                    document.getElementById(
+                        'submitButton'
+                    );
+
+                let validationTimer = null;
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Password visibility
+                |--------------------------------------------------------------------------
+                */
+
+                document
+                    .getElementById(
+                        'togglePassword'
+                    )
+                    .addEventListener(
+                        'click',
+                        function() {
+
+                            if (
+                                passwordInput.type ===
+                                'password'
+                            ) {
+
+                                passwordInput.type =
+                                    'text';
+
+                                document
+                                    .getElementById(
+                                        'passwordIcon'
+                                    )
+                                    .className =
+                                    'fa fa-eye-slash';
+
+                            } else {
+
+                                passwordInput.type =
+                                    'password';
+
+                                document
+                                    .getElementById(
+                                        'passwordIcon'
+                                    )
+                                    .className =
+                                    'fa fa-eye';
+
+                            }
+
+                        }
+                    );
+
+
+                document
+                    .getElementById(
+                        'toggleConfirmPassword'
+                    )
+                    .addEventListener(
+                        'click',
+                        function() {
+
+                            if (
+                                confirmInput.type ===
+                                'password'
+                            ) {
+
+                                confirmInput.type =
+                                    'text';
+
+                                document
+                                    .getElementById(
+                                        'confirmIcon'
+                                    )
+                                    .className =
+                                    'fa fa-eye-slash';
+
+                            } else {
+
+                                confirmInput.type =
+                                    'password';
+
+                                document
+                                    .getElementById(
+                                        'confirmIcon'
+                                    )
+                                    .className =
+                                    'fa fa-eye';
+
+                            }
+
+                        }
+                    );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Password checklist
+                |--------------------------------------------------------------------------
+                */
+
+                function updatePasswordChecklist() {
+
+                    const password =
+                        passwordInput.value;
+
+
+                    if (!password) {
+
+                        resetPasswordChecklist();
+
+                        return;
+                    }
+
+
+                    const checks = {
+
+                        length: password.length >= 8,
+
+                        uppercase: /[A-Z]/.test(password),
+
+                        lowercase: /[a-z]/.test(password),
+
+                        number: /[0-9]/.test(password),
+
+                        special: /[\W_]/.test(password),
+
+                        common:
+                            ![
+                                'password',
+                                '123456',
+                                '12345678',
+                                'qwerty',
+                                'abc123',
+                                'password1',
+                                'admin',
+                                'welcome',
+                                'password123'
+                            ].includes(
+                                password.toLowerCase()
+                            )
+
+                    };
+
+
+                    updateRule(
+                        'rule-length',
+                        checks.length,
+                        'At least 8 characters'
+                    );
+
+                    updateRule(
+                        'rule-uppercase',
+                        checks.uppercase,
+                        'One uppercase letter'
+                    );
+
+                    updateRule(
+                        'rule-lowercase',
+                        checks.lowercase,
+                        'One lowercase letter'
+                    );
+
+                    updateRule(
+                        'rule-number',
+                        checks.number,
+                        'One number'
+                    );
+
+                    updateRule(
+                        'rule-special',
+                        checks.special,
+                        'One special character'
+                    );
+
+                    updateRule(
+                        'rule-common',
+                        checks.common,
+                        'Not a common password'
+                    );
+
+
+                    const passed =
+                        Object.values(checks)
+                        .filter(Boolean)
+                        .length;
+
+
+                    const bar =
+                        document.getElementById(
+                            'password-strength-bar'
+                        );
+
+                    const text =
+                        document.getElementById(
+                            'strength-text'
+                        );
+
+
+                    bar.style.width =
+                        Math.round(
+                            (passed / 6) * 100
+                        ) + '%';
+
+
+                    if (passed <= 2) {
+
+                        text.textContent =
+                            'Password strength: Weak';
+
+                    } else if (passed <= 4) {
+
+                        text.textContent =
+                            'Password strength: Medium';
+
+                    } else if (passed === 5) {
+
+                        text.textContent =
+                            'Password strength: Strong';
+
+                    } else {
+
+                        text.textContent =
+                            'Password strength: Excellent';
+
+                    }
+
+                }
+
+
+                function resetPasswordChecklist() {
+
+                    const rules = [
+                        [
+                            'rule-length',
+                            'At least 8 characters'
+                        ],
+                        [
+                            'rule-uppercase',
+                            'One uppercase letter'
+                        ],
+                        [
+                            'rule-lowercase',
+                            'One lowercase letter'
+                        ],
+                        [
+                            'rule-number',
+                            'One number'
+                        ],
+                        [
+                            'rule-special',
+                            'One special character'
+                        ],
+                        [
+                            'rule-common',
+                            'Not a common password'
+                        ]
+                    ];
+
+
+                    rules.forEach(
+                        rule => {
+
+                            const element =
+                                document.getElementById(
+                                    rule[0]
+                                );
+
+                            element.classList.remove(
+                                'valid',
+                                'invalid'
+                            );
+
+                            element.innerHTML =
+                                `❌ ${rule[1]}`;
+
+                        }
+                    );
+
+
+                    document
+                        .getElementById(
+                            'password-strength-bar'
+                        )
+                        .style.width =
+                        '0%';
+
+
+                    document
+                        .getElementById(
+                            'strength-text'
+                        )
+                        .textContent =
+                        'Password strength: —';
+
+                }
+
+
+                function updateRule(
+                    id,
+                    valid,
+                    text
+                ) {
+
+                    const element =
+                        document.getElementById(id);
+
+                    element.classList.remove(
+                        'valid',
+                        'invalid'
+                    );
+
+
+                    if (valid) {
+
+                        element.classList.add(
+                            'valid'
+                        );
+
+                        element.innerHTML =
+                            `✅ ${text}`;
+
+                    } else {
+
+                        element.classList.add(
+                            'invalid'
+                        );
+
+                        element.innerHTML =
+                            `❌ ${text}`;
+
+                    }
+
+                }
+
+
+                passwordInput.addEventListener(
+                    'input',
+                    function() {
+
+                        updatePasswordChecklist();
+
+                        validateWithAjax();
+
+                    }
+                );
+
+
+                confirmInput.addEventListener(
+                    'input',
+                    function() {
+
+                        checkConfirmation();
+
+                        validateWithAjax();
+
+                    }
+                );
+
+
+                function checkConfirmation() {
+
+                    if (!confirmInput.value) {
+
+                        setStatus(
+                            'status-confirm',
+                            'pending',
+                            'Password confirmation'
+                        );
+
+                        return;
+                    }
+
+
+                    if (
+                        confirmInput.value ===
+                        passwordInput.value
+                    ) {
+
+                        confirmInput.classList.remove(
+                            'is-invalid'
+                        );
+
+                        confirmInput.classList.add(
+                            'is-valid'
+                        );
+
+                        document
+                            .getElementById(
+                                'confirm-error'
+                            )
+                            .innerHTML = '';
+
+
+                        setStatus(
+                            'status-confirm',
+                            'valid',
+                            'Password confirmation'
+                        );
+
+                    } else {
+
+                        confirmInput.classList.remove(
+                            'is-valid'
+                        );
+
+                        confirmInput.classList.add(
+                            'is-invalid'
+                        );
+
+
+                        document
+                            .getElementById(
+                                'confirm-error'
+                            )
+                            .innerHTML =
+                            '<i class="fa fa-info-circle"></i> Password confirmation does not match.';
+
+
+                        setStatus(
+                            'status-confirm',
+                            'invalid',
+                            'Password confirmation'
+                        );
+
+                    }
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | AJAX validation
+                |--------------------------------------------------------------------------
+                */
+
+                function validateWithAjax() {
+
+                    clearTimeout(
+                        validationTimer
+                    );
+
+                    validationTimer =
+                        setTimeout(
+                            sendValidationRequest,
+                            500
+                        );
+
+                }
+
+
+                async function sendValidationRequest() {
+
+                    const formData =
+                        new FormData(form);
+
+
+                    try {
+
+                        const response =
+                            await fetch(
+                                form.dataset.validateUrl, {
+                                    method: 'POST',
+
+                                    headers: {
+
+                                        'X-CSRF-TOKEN': document
+                                            .querySelector(
+                                                'meta[name="csrf-token"]'
+                                            )
+                                            .content,
+
+                                        'Accept': 'application/json'
+
+                                    },
+
+                                    body: formData
+
+                                }
+                            );
+
+
+                        const data =
+                            await response.json();
+
+
+                        clearErrors();
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Duplicate name
+                        |--------------------------------------------------------------------------
+                        */
+
+                        const warning =
+                            document.getElementById(
+                                'name-warning'
+                            );
+
+
+                        if (
+                            data.duplicate_name
+                        ) {
+
+                            warning.classList.remove(
+                                'd-none'
+                            );
+
+                        } else {
+
+                            warning.classList.add(
+                                'd-none'
+                            );
+
+                        }
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Errors
+                        |--------------------------------------------------------------------------
+                        */
+
+                        if (data.errors) {
+
+                            Object.keys(
+                                data.errors
+                            ).forEach(
+                                field => {
+
+                                    showError(
+                                        field,
+                                        data.errors[field][0]
+                                    );
+
+                                }
+                            );
+
+                        }
+
+
+                        updateStatuses(
+                            data.errors || {}
+                        );
+
+
+                    } catch (error) {
+
+                        console.error(
+                            'AJAX validation error:',
+                            error
+                        );
+
+                    }
+
+                }
+
+
+                function showError(
+                    field,
+                    message
+                ) {
+
+                    let input = null;
+
+                    let errorElement = null;
+
+
+                    if (field === 'name') {
+
+                        input = nameInput;
+
+                        errorElement =
+                            document.getElementById(
+                                'name-error'
+                            );
+
+                    }
+
+                    if (field === 'email') {
+
+                        input = emailInput;
+
+                        errorElement =
+                            document.getElementById(
+                                'email-error'
+                            );
+
+                    }
+
+                    if (field === 'password') {
+
+                        input = passwordInput;
+
+                        errorElement =
+                            document.getElementById(
+                                'password-error'
+                            );
+
+                    }
+
+                    if (
+                        field ===
+                        'password_confirmation'
+                    ) {
+
+                        input = confirmInput;
+
+                        errorElement =
+                            document.getElementById(
+                                'confirm-error'
+                            );
+
+                    }
+
+
+                    if (
+                        input &&
+                        errorElement
+                    ) {
+
+                        input.classList.add(
+                            'is-invalid'
+                        );
+
+                        input.classList.remove(
+                            'is-valid'
+                        );
+
+                        errorElement.innerHTML =
+                            `<i class="fa fa-info-circle"></i> ${message}`;
+
+                    }
+
+                }
+
+
+                function clearErrors() {
+
+                    document
+                        .querySelectorAll(
+                            '.text-danger'
+                        )
+                        .forEach(
+                            element => {
+
+                                element.innerHTML =
+                                    '';
+
+                            }
+                        );
+
+
+                    document
+                        .querySelectorAll(
+                            '.form-control'
+                        )
+                        .forEach(
+                            element => {
+
+                                element.classList.remove(
+                                    'is-invalid'
+                                );
+
+                            }
+                        );
+
+                }
+
+
+                function updateStatuses(
+                    errors
+                ) {
+
+                    setStatus(
+                        'status-name',
+                        errors.name ?
+                        'invalid' :
+                        nameInput.value.length >= 2 ?
+                        'valid' :
+                        'pending',
+                        'Name'
+                    );
+
+
+                    setStatus(
+                        'status-email',
+                        errors.email ?
+                        'invalid' :
+                        emailInput.value ?
+                        'valid' :
+                        'pending',
+                        'Email'
+                    );
+
+
+                    if (!passwordInput.value) {
+
+                        setStatus(
+                            'status-password',
+                            'pending',
+                            'New password'
+                        );
+
+                    } else {
+
+                        setStatus(
+                            'status-password',
+                            errors.password ?
+                            'invalid' :
+                            'valid',
+                            'New password'
+                        );
+
+                    }
+
+
+                    if (
+                        !confirmInput.value
+                    ) {
+
+                        setStatus(
+                            'status-confirm',
+                            'pending',
+                            'Password confirmation'
+                        );
+
+                    } else if (
+                        confirmInput.value ===
+                        passwordInput.value
+                    ) {
+
+                        setStatus(
+                            'status-confirm',
+                            'valid',
+                            'Password confirmation'
+                        );
+
+                    }
+
+                }
+
+
+                function setStatus(
+                    id,
+                    status,
+                    text
+                ) {
+
+                    const element =
+                        document.getElementById(id);
+
+
+                    element.classList.remove(
+                        'valid',
+                        'invalid'
+                    );
+
+
+                    const icon =
+                        element.querySelector(
+                            'i'
+                        );
+
+
+                    if (status === 'valid') {
+
+                        element.classList.add(
+                            'valid'
+                        );
+
+                        icon.className =
+                            'fa fa-circle-check';
+
+                    } else if (
+                        status === 'invalid'
+                    ) {
+
+                        element.classList.add(
+                            'invalid'
+                        );
+
+                        icon.className =
+                            'fa fa-circle-xmark';
+
+                    } else {
+
+                        icon.className =
+                            'fa fa-circle';
+
+                    }
+
+
+                    element.lastChild.textContent =
+                        ' ' + text;
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Input listeners
+                |--------------------------------------------------------------------------
+                */
+
+                nameInput.addEventListener(
+                    'input',
+                    validateWithAjax
+                );
+
+                emailInput.addEventListener(
+                    'input',
+                    validateWithAjax
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Submit
+                |--------------------------------------------------------------------------
+                */
+
+                form.addEventListener(
+                    'submit',
+                    async function(event) {
+
+                        event.preventDefault();
+
+
+                        submitButton.disabled =
+                            true;
+
+
+                        submitButton.innerHTML =
+                            '<i class="fa fa-spinner fa-spin me-1"></i> Validating...';
+
+
+                        checkConfirmation();
+
+
+                        await sendValidationRequest();
+
+
+                        if (
+                            document.querySelector(
+                                '.form-control.is-invalid'
+                            )
+                        ) {
+
+                            submitButton.disabled =
+                                false;
+
+                            submitButton.innerHTML =
+                                '<i class="fa fa-save me-1"></i> Update User';
+
+                            return;
+
+                        }
+
+
+                        submitButton.innerHTML =
+                            '<i class="fa fa-spinner fa-spin me-1"></i> Updating...';
+
+
+                        form.submit();
+
+                    }
+                );
+
+
+                resetPasswordChecklist();
+
+            }
+        );
+    </script>
 
 </body>
 

@@ -3,22 +3,17 @@
 namespace App\Http\Requests;
 
 use App\Rules\NotCommonPassword;
+use App\Rules\NotDisposableEmail;
 use App\Rules\PasswordStrength;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreUserRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Prepare and sanitize input before validation.
-     */
     protected function prepareForValidation(): void
     {
         $this->merge([
@@ -27,9 +22,6 @@ class StoreUserRequest extends FormRequest
         ]);
     }
 
-    /**
-     * Sanitize a text value.
-     */
     protected function sanitize(?string $value): ?string
     {
         if ($value === null) {
@@ -38,28 +30,32 @@ class StoreUserRequest extends FormRequest
 
         return trim(
             strip_tags(
-                html_entity_decode($value, ENT_QUOTES, 'UTF-8')
+                html_entity_decode(
+                    $value,
+                    ENT_QUOTES,
+                    'UTF-8'
+                )
             )
         );
     }
 
-    /**
-     * Get validation rules.
-     */
     public function rules(): array
     {
         return [
             'name' => [
                 'required',
                 'string',
+                'min:2',
                 'max:255',
             ],
 
             'email' => [
                 'required',
+                'string',
                 'email',
                 'max:255',
                 'unique:users,email',
+                new NotDisposableEmail,
             ],
 
             'password' => [
@@ -73,25 +69,47 @@ class StoreUserRequest extends FormRequest
         ];
     }
 
-    /**
-     * Get custom validation messages.
-     */
     public function messages(): array
     {
         return [
-            'name.required' => 'Name field is required.',
-            'name.string' => 'Name must contain only text characters.',
-            'name.max' => 'Name may not be greater than 255 characters.',
+            'name.required' =>
+            'Name field is required.',
 
-            'email.required' => 'Email field is required.',
-            'email.email' => 'Email field must be a valid email address.',
-            'email.max' => 'Email may not be greater than 255 characters.',
-            'email.unique' => 'This email is already registered. Please try another.',
+            'name.string' =>
+            'Name must contain only text characters.',
 
-            'password.required' => 'Password field is required.',
-            'password.string' => 'Password must be a valid text value.',
-            'password.min' => 'Password must be at least 8 characters long.',
-            'password.confirmed' => 'Password confirmation does not match.',
+            'name.min' =>
+            'Name must contain at least 2 characters.',
+
+            'name.max' =>
+            'Name may not be greater than 255 characters.',
+
+            'email.required' =>
+            'Email field is required.',
+
+            'email.string' =>
+            'Email must be a valid text value.',
+
+            'email.email' =>
+            'Email field must be a valid email address.',
+
+            'email.max' =>
+            'Email may not be greater than 255 characters.',
+
+            'email.unique' =>
+            'This email is already registered. Please try another.',
+
+            'password.required' =>
+            'Password field is required.',
+
+            'password.string' =>
+            'Password must be a valid text value.',
+
+            'password.min' =>
+            'Password must be at least 8 characters long.',
+
+            'password.confirmed' =>
+            'Password confirmation does not match.',
         ];
     }
 }

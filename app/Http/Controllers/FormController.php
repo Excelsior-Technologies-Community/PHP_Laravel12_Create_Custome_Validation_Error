@@ -8,23 +8,30 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 class FormController extends Controller
 {
     /**
-     * Display a paginated list of all users.
+     * Display users.
      */
     public function index(): View
     {
-        $users = User::orderBy('created_at', 'desc')->paginate(10);
+        $users = User::orderBy(
+            'created_at',
+            'desc'
+        )->paginate(10);
 
-        return view('users.index', compact('users'));
+        return view(
+            'users.index',
+            compact('users')
+        );
     }
 
     /**
-     * Display the user creation form.
+     * Create user form.
      */
     public function create(): View
     {
@@ -32,68 +39,84 @@ class FormController extends Controller
     }
 
     /**
-     * Store a newly created user.
+     * Store user.
      */
-    public function store(StoreUserRequest $request): RedirectResponse
-    {
-        $validatedData = $request->validated();
-
-        // Password is automatically hashed by the User model cast.
-        User::create($validatedData);
+    public function store(
+        StoreUserRequest $request
+    ): RedirectResponse {
+        User::create(
+            $request->validated()
+        );
 
         return redirect()
             ->route('users.index')
-            ->with('success', 'User created successfully.');
+            ->with(
+                'success',
+                'User created successfully.'
+            );
     }
 
     /**
-     * Display the user edit form.
+     * Edit user.
      */
     public function edit(User $user): View
     {
-        return view('users.edit', compact('user'));
+        return view(
+            'users.edit',
+            compact('user')
+        );
     }
 
     /**
-     * Update an existing user.
+     * Update user.
      */
     public function update(
         UpdateUserRequest $request,
         User $user
     ): RedirectResponse {
-        $validatedData = $request->validated();
+        $validatedData =
+            $request->validated();
 
-        /*
-         * If password is empty, remove it from the update data
-         * so the existing password remains unchanged.
-         */
-        if (empty($validatedData['password'])) {
-            unset($validatedData['password']);
+        if (
+            empty($validatedData['password'])
+        ) {
+            unset(
+                $validatedData['password']
+            );
         }
 
-        // Password is automatically hashed by the User model cast.
         $user->update($validatedData);
 
         return redirect()
             ->route('users.index')
-            ->with('success', 'User updated successfully.');
+            ->with(
+                'success',
+                'User updated successfully.'
+            );
     }
 
     /**
-     * Delete the specified user.
+     * Delete user.
      */
-    public function destroy(User $user): RedirectResponse
-    {
+    public function destroy(
+        User $user
+    ): RedirectResponse {
+        $name = $user->name;
+
         $user->delete();
 
-        return back()->with('success', 'User deleted successfully.');
+        return back()->with(
+            'success',
+            "User {$name} deleted successfully."
+        );
     }
 
     /**
-     * Validate create form fields through AJAX.
+     * AJAX create validation.
      */
-    public function validateAjax(Request $request): JsonResponse
-    {
+    public function validateAjax(
+        Request $request
+    ): JsonResponse {
         $input = $request->only([
             'name',
             'email',
@@ -101,21 +124,14 @@ class FormController extends Controller
             'password_confirmation',
         ]);
 
-        $formRequest = new StoreUserRequest;
+        $formRequest =
+            new StoreUserRequest;
 
-        $rules = $formRequest->rules();
-        $messages = $formRequest->messages();
+        $rules =
+            $formRequest->rules();
 
-        /*
-         * During real-time validation, confirmed is handled
-         * separately by the frontend.
-         */
-        $rules['password'] = array_values(
-            array_filter(
-                $rules['password'],
-                fn ($rule) => $rule !== 'confirmed'
-            )
-        );
+        $messages =
+            $formRequest->messages();
 
         $validator = Validator::make(
             $input,
@@ -123,20 +139,40 @@ class FormController extends Controller
             $messages
         );
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors(),
-            ], 422);
+        $response = [
+            'success' =>
+            ! $validator->fails(),
+            'errors' =>
+            $validator->errors(),
+        ];
+
+        if (
+            ! empty($input['name'])
+        ) {
+            $duplicateName =
+                User::where(
+                    'name',
+                    $input['name']
+                )->exists();
+
+            $response['duplicate_name'] =
+                $duplicateName;
         }
 
-        return response()->json([
-            'success' => true,
-        ]);
+        if ($validator->fails()) {
+            return response()->json(
+                $response,
+                422
+            );
+        }
+
+        return response()->json(
+            $response
+        );
     }
 
     /**
-     * Validate edit form fields through AJAX.
+     * AJAX update validation.
      */
     public function validateUpdateAjax(
         Request $request,
@@ -149,21 +185,14 @@ class FormController extends Controller
             'password_confirmation',
         ]);
 
-        $formRequest = new UpdateUserRequest;
+        $formRequest =
+            new UpdateUserRequest;
 
-        $rules = $formRequest->rulesForUser($user);
-        $messages = $formRequest->messages();
+        $rules =
+            $formRequest->rulesForUser($user);
 
-        /*
-         * Password confirmation is checked when the complete
-         * form is submitted.
-         */
-        $rules['password'] = array_values(
-            array_filter(
-                $rules['password'],
-                fn ($rule) => $rule !== 'confirmed'
-            )
-        );
+        $messages =
+            $formRequest->messages();
 
         $validator = Validator::make(
             $input,
@@ -171,15 +200,105 @@ class FormController extends Controller
             $messages
         );
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors(),
-            ], 422);
+        $response = [
+            'success' =>
+            ! $validator->fails(),
+            'errors' =>
+            $validator->errors(),
+        ];
+
+        if (
+            ! empty($input['name'])
+        ) {
+            $duplicateName =
+                User::where(
+                    'name',
+                    $input['name']
+                )
+                ->where(
+                    'id',
+                    '!=',
+                    $user->id
+                )
+                ->exists();
+
+            $response['duplicate_name'] =
+                $duplicateName;
         }
 
-        return response()->json([
-            'success' => true,
+        if ($validator->fails()) {
+            return response()->json(
+                $response,
+                422
+            );
+        }
+
+        return response()->json(
+            $response
+        );
+    }
+
+    /**
+     * Export users to CSV.
+     */
+    public function exportCsv(): Response
+    {
+        $users = User::orderBy(
+            'created_at',
+            'desc'
+        )->get();
+
+        $filename =
+            'users-' .
+            now()->format('Y-m-d-H-i-s') .
+            '.csv';
+
+        $handle = fopen(
+            'php://temp',
+            'w+'
+        );
+
+        fputcsv($handle, [
+            'ID',
+            'Name',
+            'Email',
+            'Created At',
         ]);
+
+        foreach ($users as $user) {
+            fputcsv($handle, [
+                $user->id,
+                $user->name,
+                $user->email,
+                $user->created_at
+                    ? $user->created_at
+                    ->format(
+                        'Y-m-d H:i:s'
+                    )
+                    : '',
+            ]);
+        }
+
+        rewind($handle);
+
+        $csv = stream_get_contents(
+            $handle
+        );
+
+        fclose($handle);
+
+        return response(
+            $csv,
+            200,
+            [
+                'Content-Type' =>
+                'text/csv; charset=UTF-8',
+
+                'Content-Disposition' =>
+                'attachment; filename="' .
+                    $filename .
+                    '"',
+            ]
+        );
     }
 }
